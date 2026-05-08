@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GST Calculator Pro 🇮🇳</title>
+
+<!-- SEO META TAGS — helps Google find your site -->
+<title>GST Calculator India - Check GST Rate by Product Name or Photo</title>
+<meta name="description" content="Free GST Calculator India. Check GST rate of any product by name or photo. Get HSN code, CGST, SGST, IGST breakdown and generate tax invoice instantly."/>
+<meta name="keywords" content="GST calculator, GST rate finder, HSN code, CGST SGST calculator, India GST, tax invoice generator, GST on products"/>
+<meta name="author" content="GST Calculator Pro"/>
+<meta property="og:title" content="GST Calculator Pro India"/>
+<meta property="og:description" content="Check GST rate of any product instantly. Free GST calculator with photo lookup, invoice generator and full tax breakdown."/>
+<meta property="og:type" content="website"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -146,100 +155,83 @@ const INIT_FBS = [
   {name:"Ankit T.",rating:5,category:"Calculator",msg:"The CGST + SGST split saves me so much time every day.",time:"1 week ago"},
 ];
 
-// API call goes to Netlify Function — key is hidden on server
-async function askClaude(promptText, imageBase64) {
+async function checkProduct(promptText, imageBase64) {
   const userContent = imageBase64
     ? [{type:"image",source:{type:"base64",media_type:"image/jpeg",data:imageBase64}},{type:"text",text:promptText}]
     : promptText;
   const res = await fetch("/.netlify/functions/claude", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",
-      max_tokens:1000,
-      messages:[{role:"user",content:userContent}]
-    })
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userContent}]})
   });
   const data = await res.json();
   if(data.error) throw new Error(data.error.message);
   return data.content.map(i=>i.text||"").join("");
 }
 
-// ── LOOKUP ────────────────────────────────────────────────────────────────────
-function LookupTab({onUseCalc, history, setHistory}) {
+function LookupTab({onUseCalc,history,setHistory}) {
   const [query,setQuery] = useState("");
   const [img64,setImg64] = useState(null);
   const [imgSrc,setImgSrc] = useState(null);
   const [loading,setLoading] = useState(false);
   const [info,setInfo] = useState(null);
   const [err,setErr] = useState("");
-
   const loadFile = file => {
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = e => { setImgSrc(e.target.result); setImg64(e.target.result.split(",")[1]); setInfo(null); setErr(""); };
+    reader.onload = e => {setImgSrc(e.target.result);setImg64(e.target.result.split(",")[1]);setInfo(null);setErr("");};
     reader.readAsDataURL(file);
   };
-
   const checkGST = async () => {
-    if(!query.trim() && !img64) return;
-    setLoading(true); setErr(""); setInfo(null);
+    if(!query.trim()&&!img64) return;
+    setLoading(true);setErr("");setInfo(null);
     const prompt = `You are an Indian GST expert. ${img64?"Identify the product in this image and then provide":`For "${query}", provide`} GST information under Indian GST law 2024-25.
 Respond ONLY with valid JSON no markdown no backticks:
 {"applicable":true,"rate":18,"detectedName":"name","category":"category","hsn":"code","type":"Goods","note":"explanation","exemptionReason":"","alternateRates":""}
 Rules: applicable=true even for 0% zero-rated. false only if fully exempt. rate must be exactly 0,5,12,18 or 28.`;
     try {
-      const text = await askClaude(prompt, img64);
+      const text = await checkProduct(prompt,img64);
       const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
-      const result = {...parsed, product: img64?(parsed.detectedName||"Identified Product"):query};
+      const result = {...parsed,product:img64?(parsed.detectedName||"Identified Product"):query};
       setInfo(result);
       setHistory(h=>[result,...h.filter(x=>x.product!==result.product)].slice(0,12));
-    } catch(e) { setErr("Error: "+e.message); }
+    } catch(e){setErr("Error: "+e.message);}
     setLoading(false);
   };
-
-  const clearImg = () => { setImg64(null); setImgSrc(null); setInfo(null); };
-  const isYes = info && info.applicable && info.rate > 0;
-  const cls = isYes ? "yes" : "no";
-
+  const clearImg=()=>{setImg64(null);setImgSrc(null);setInfo(null);};
+  const isYes=info&&info.applicable&&info.rate>0;
+  const cls=isYes?"yes":"no";
   return (
     <div className="card">
       <div className="card-title">📦 Search by Name or Photo</div>
-      {imgSrc ? (
+      {imgSrc?(
         <div className="preview-wrap">
           <img src={imgSrc} alt="product" className="preview-img"/>
           <button className="preview-rm" onClick={clearImg}>✕ Remove</button>
         </div>
-      ) : (
+      ):(
         <>
           <div className="photo-options">
             <div className="photo-btn">
-              <span className="ico">📷</span>
-              <span>Open Camera</span>
+              <span className="ico">📷</span><span>Open Camera</span>
               <input type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files[0])}/>
             </div>
             <div className="photo-btn">
-              <span className="ico">🖼️</span>
-              <span>Choose Photo</span>
+              <span className="ico">🖼️</span><span>Choose Photo</span>
               <input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/>
             </div>
           </div>
-          <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>
-            📸 Tip: Photograph the product label for best results
-          </div>
+          <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>📸 Tip: Photograph the product label for best results</div>
         </>
       )}
       <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>— or type the product name —</div>
       <div className="row">
-        <input className="inp" placeholder="e.g. Mobile phone, Rice, Gold jewellery..." value={query}
-          onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&checkGST()}/>
-        <button className="btn btn-gold" onClick={checkGST} disabled={loading||(!query.trim()&&!img64)}>
-          {loading?"...":"Check GST"}
-        </button>
+        <input className="inp" placeholder="e.g. Mobile phone, Rice, Gold jewellery..." value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&checkGST()}/>
+        <button className="btn btn-gold" onClick={checkGST} disabled={loading||(!query.trim()&&!img64)}>{loading?"...":"Check GST"}</button>
       </div>
-      {loading && <div className="loading"><div className="ld"/><div className="ld"/><div className="ld"/><span>Checking GST rules...</span></div>}
-      {err && <div className="err">⚠️ {err}</div>}
-      {info && !loading && (
+      {loading&&<div className="loading"><div className="ld"/><div className="ld"/><div className="ld"/><span>Checking GST rates...</span></div>}
+      {err&&<div className="err">⚠️ {err}</div>}
+      {info&&!loading&&(
         <div className={`result ${cls}`}>
           <div className="r-top">
             <div className="r-product">{info.product}</div>
@@ -251,15 +243,13 @@ Rules: applicable=true even for 0% zero-rated. false only if fully exempt. rate 
             {info.category&&<div className="info-item"><div className="info-lbl">Category</div><div className="info-val">{info.category}</div></div>}
             {info.type&&<div className="info-item"><div className="info-lbl">Type</div><div className="info-val">{info.type}</div></div>}
           </div>
-          {isYes&&(
-            <div className="breakdown">
-              <div className="bk-row"><span className="bk-hd">Intra-State</span><span/></div>
-              <div className="bk-row"><span>CGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
-              <div className="bk-row"><span>SGST/UTGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
-              <div className="bk-row" style={{marginTop:6}}><span className="bk-hd">Inter-State</span><span/></div>
-              <div className="bk-row"><span>IGST</span><span style={{fontWeight:600}}>{info.rate}%</span></div>
-            </div>
-          )}
+          {isYes&&<div className="breakdown">
+            <div className="bk-row"><span className="bk-hd">Intra-State</span><span/></div>
+            <div className="bk-row"><span>CGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
+            <div className="bk-row"><span>SGST/UTGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
+            <div className="bk-row" style={{marginTop:6}}><span className="bk-hd">Inter-State</span><span/></div>
+            <div className="bk-row"><span>IGST</span><span style={{fontWeight:600}}>{info.rate}%</span></div>
+          </div>}
           {info.note&&<div className="note-box">📋 {info.note}</div>}
           {info.exemptionReason&&<div className="note-box" style={{marginTop:8}}>ℹ️ {info.exemptionReason}</div>}
           {info.alternateRates&&<div className="note-box" style={{background:"var(--gold-light)",border:"1px solid var(--gold-border)",color:"var(--gold)",marginTop:8}}>⚡ {info.alternateRates}</div>}
@@ -270,15 +260,11 @@ Rules: applicable=true even for 0% zero-rated. false only if fully exempt. rate 
   );
 }
 
-// ── CALCULATOR ────────────────────────────────────────────────────────────────
 function CalcTab({initRate}) {
-  const [amount,setAmount] = useState("");
-  const [rate,setRate] = useState(initRate||18);
-  const [mode,setMode] = useState("excl");
-  const [txn,setTxn] = useState("intra");
-  const [showInv,setShowInv] = useState(false);
-  const [invDesc,setInvDesc] = useState("");
-  const n=parseFloat(amount)||0, r=parseFloat(rate)||0;
+  const [amount,setAmount]=useState("");const [rate,setRate]=useState(initRate||18);
+  const [mode,setMode]=useState("excl");const [txn,setTxn]=useState("intra");
+  const [showInv,setShowInv]=useState(false);const [invDesc,setInvDesc]=useState("");
+  const n=parseFloat(amount)||0,r=parseFloat(rate)||0;
   let base,gstAmt,total;
   if(mode==="excl"){base=n;gstAmt=n*r/100;total=n+gstAmt;}
   else{total=n;base=n*100/(100+r);gstAmt=total-base;}
@@ -344,7 +330,7 @@ function CalcTab({initRate}) {
                 <tr className="tr"><td colSpan="3"/><td style={{fontWeight:700}}>Grand Total</td><td style={{textAlign:"right",fontWeight:700,color:"var(--green)"}}>₹{fmt(total)}</td></tr>
               </tfoot>
             </table>
-            <div className="inv-footer">Computer generated · For reference only</div>
+            <div className="inv-footer">For reference only · Verify with a CA before filing</div>
           </div>}
         </div>
       </>}
@@ -352,11 +338,9 @@ function CalcTab({initRate}) {
   );
 }
 
-// ── HISTORY ───────────────────────────────────────────────────────────────────
 function HistoryTab({history,onClear}) {
   if(!history.length) return (
-    <div className="card">
-      <div className="card-title">🕐 Recent Lookups</div>
+    <div className="card"><div className="card-title">🕐 Recent Lookups</div>
       <div style={{textAlign:"center",padding:"36px 0",color:"var(--text3)"}}>
         <div style={{fontSize:28,marginBottom:8}}>🔍</div>
         <div style={{fontSize:14}}>No lookups yet. Search a product first!</div>
@@ -364,15 +348,11 @@ function HistoryTab({history,onClear}) {
     </div>
   );
   return (
-    <div className="card">
-      <div className="card-title">🕐 Recent Lookups ({history.length})</div>
+    <div className="card"><div className="card-title">🕐 Recent Lookups ({history.length})</div>
       {history.map((h,i)=>(
         <div key={i} className="hist-item">
           <div className={`hist-badge${!h.applicable?" ex":""}`}>{h.applicable?`${h.rate}%`:"Exempt"}</div>
-          <div style={{flex:1}}>
-            <div className="hist-name">{h.product}</div>
-            <div className="hist-meta">{h.category}{h.hsn?` · HSN: ${h.hsn}`:""}</div>
-          </div>
+          <div style={{flex:1}}><div className="hist-name">{h.product}</div><div className="hist-meta">{h.category}{h.hsn?` · HSN: ${h.hsn}`:""}</div></div>
         </div>
       ))}
       <button className="btn btn-outline btn-sm" style={{marginTop:13}} onClick={onClear}>Clear History</button>
@@ -380,15 +360,11 @@ function HistoryTab({history,onClear}) {
   );
 }
 
-// ── FEEDBACK ──────────────────────────────────────────────────────────────────
 function FeedbackTab() {
-  const [feedbacks,setFeedbacks] = useState(INIT_FBS);
-  const [rating,setRating] = useState(0);
-  const [hover,setHover] = useState(0);
-  const [category,setCategory] = useState("");
-  const [name,setName] = useState("");
-  const [msg,setMsg] = useState("");
-  const [submitted,setSubmitted] = useState(false);
+  const [feedbacks,setFeedbacks]=useState(INIT_FBS);
+  const [rating,setRating]=useState(0);const [hover,setHover]=useState(0);
+  const [category,setCategory]=useState("");const [name,setName]=useState("");
+  const [msg,setMsg]=useState("");const [submitted,setSubmitted]=useState(false);
   const avg=feedbacks.length?(feedbacks.reduce((s,f)=>s+f.rating,0)/feedbacks.length).toFixed(1):"—";
   const starCounts=[5,4,3,2,1].map(s=>({s,count:feedbacks.filter(f=>f.rating===s).length}));
   const submit=()=>{
@@ -399,8 +375,7 @@ function FeedbackTab() {
   const reset=()=>{setRating(0);setHover(0);setCategory("");setName("");setMsg("");setSubmitted(false);};
   return (
     <>
-      <div className="card">
-        <div className="card-title">📊 Overall Rating</div>
+      <div className="card"><div className="card-title">📊 Overall Rating</div>
         <div className="rating-summary">
           <div><div className="rating-big">{avg}</div><div className="rating-sub">/ 5 · {feedbacks.length} reviews</div></div>
           <div style={{flex:1}}>
@@ -414,8 +389,7 @@ function FeedbackTab() {
           </div>
         </div>
       </div>
-      <div className="card">
-        <div className="card-title">✍️ Leave Your Feedback</div>
+      <div className="card"><div className="card-title">✍️ Leave Your Feedback</div>
         {submitted?(
           <div className="ok-box">
             <div style={{fontSize:32,marginBottom:8}}>🎉</div>
@@ -448,14 +422,10 @@ function FeedbackTab() {
           </>
         )}
       </div>
-      <div className="card">
-        <div className="card-title">💬 All Reviews ({feedbacks.length})</div>
+      <div className="card"><div className="card-title">💬 All Reviews ({feedbacks.length})</div>
         {feedbacks.map((f,i)=>(
           <div key={i} className="fb-card">
-            <div className="fb-card-top">
-              <span className="fb-card-stars">{"⭐".repeat(f.rating)}</span>
-              <span className="fb-card-meta">{f.name} · {f.time}</span>
-            </div>
+            <div className="fb-card-top"><span className="fb-card-stars">{"⭐".repeat(f.rating)}</span><span className="fb-card-meta">{f.name} · {f.time}</span></div>
             <div className="fb-card-cat">{f.category}</div>
             <div className="fb-card-msg">{f.msg}</div>
           </div>
@@ -465,18 +435,17 @@ function FeedbackTab() {
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
 function App() {
-  const [tab,setTab] = useState("lookup");
-  const [calcRate,setCalcRate] = useState(18);
-  const [history,setHistory] = useState([]);
+  const [tab,setTab]=useState("lookup");
+  const [calcRate,setCalcRate]=useState(18);
+  const [history,setHistory]=useState([]);
   return (
     <div className="app">
       <div className="wrap">
         <div className="hdr">
           <div className="hdr-badge">🇮🇳 India · GST Portal</div>
           <h1>GST <em>Calculator</em> Pro</h1>
-          <p>AI-powered · Photo lookup · Full breakdown · Invoice generator</p>
+          <p>Photo lookup · Full breakdown · Invoice generator · 100% Free</p>
         </div>
         <div className="tabs">
           {[["lookup","🔍 Lookup"],["calc","🧮 Calculator"],["history","🕐 History"],["feedback","💬 Feedback"]].map(([k,v])=>(
@@ -487,7 +456,7 @@ function App() {
         {tab==="calc"&&<CalcTab initRate={calcRate}/>}
         {tab==="history"&&<HistoryTab history={history} onClear={()=>setHistory([])}/>}
         {tab==="feedback"&&<FeedbackTab/>}
-        <div className="footer-note">Powered by Claude AI · Indian GST Act · For reference only · Verify with a CA</div>
+        <div className="footer-note">© 2025 GST Calculator Pro · India · For reference only · Verify with a CA</div>
       </div>
     </div>
   );
@@ -496,3 +465,4 @@ ReactDOM.render(<App/>, document.getElementById("root"));
 </script>
 </body>
 </html>
+
