@@ -250,11 +250,7 @@ function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
   };
   const clear = () => { setApiKey(""); setInput(""); localStorage.removeItem("gst_api_key"); };
 
-  if(apiKey) return (
-    <div className="api-saved">
-      <div className="api-saved-text">✅ Connected — GST lookup active!</div>
-    </div>
-  );
+  if(apiKey) return null;
 
   return (
     <div className="api-card">
