@@ -172,17 +172,17 @@ const INIT_FBS = [
 ];
 
 const PROVIDERS = [
-  { id:"gemini", name:"Google Gemini", tag:"FREE Forever", free:true, placeholder:"AIzaSy-xxxxxxxxxxxx", link:"https://aistudio.google.com/app/apikey", linkText:"Get free key at aistudio.google.com" },
-  { id:"groq",   name:"Groq",          tag:"FREE Tier",    free:true, placeholder:"gsk_xxxxxxxxxxxx",    link:"https://console.groq.com",              linkText:"Get free key at console.groq.com" },
-  { id:"openrouter", name:"OpenRouter", tag:"FREE Models", free:true, placeholder:"sk-or-xxxxxxxxxxxx", link:"https://openrouter.ai/keys",            linkText:"Get free key at openrouter.ai" },
-  { id:"claude", name:"Anthropic",      tag:"Paid",        free:false, placeholder:"sk-ant-xxxxxxxxxxxx", link:"https://console.anthropic.com",        linkText:"Get key at console.anthropic.com" },
+  { id:"gemini", name:"Provider 1", tag:"FREE Forever", free:true, placeholder:"AIzaSy-xxxxxxxxxxxx", link:"https://aistudio.google.com/app/apikey", linkText:"Get free key at aistudio.google.com" },
+  { id:"groq",   name:"Provider 2", tag:"FREE Tier",    free:true, placeholder:"gsk_xxxxxxxxxxxx",    link:"https://console.groq.com",              linkText:"Get free key at console.groq.com" },
+  { id:"openrouter", name:"Provider 3", tag:"FREE Models", free:true, placeholder:"sk-or-xxxxxxxxxxxx", link:"https://openrouter.ai/keys",            linkText:"Get free key at openrouter.ai" },
+  { id:"claude", name:"Provider 4",      tag:"Paid",        free:false, placeholder:"sk-ant-xxxxxxxxxxxx", link:"https://console.anthropic.com",        linkText:"Get key at console.anthropic.com" },
 ];
 
 async function callGemini(prompt, imageBase64, apiKey) {
   const parts = [];
   if(imageBase64) parts.push({inlineData:{mimeType:"image/jpeg",data:imageBase64}});
   parts.push({text: prompt});
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({contents:[{parts}]})
@@ -196,7 +196,7 @@ async function callGroq(prompt, apiKey) {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method:"POST",
     headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
-    body:JSON.stringify({model:"llama3-8b-8192",messages:[{role:"user",content:prompt}],max_tokens:1000})
+    body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"user",content:prompt}],max_tokens:1000})
   });
   const data = await res.json();
   if(data.error) throw new Error(data.error.message);
@@ -252,15 +252,15 @@ function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
 
   if(apiKey) return (
     <div className="api-saved">
-      <div className="api-saved-text">✅ {p.name} connected — GST lookup active!</div>
+      <div className="api-saved-text">✅ Connected — GST lookup active!</div>
       <button className="btn btn-outline btn-sm" onClick={clear}>Change</button>
     </div>
   );
 
   return (
     <div className="api-card">
-      <div className="api-card-title">🔑 Connect Free API Key to enable GST Lookup</div>
-      <div className="api-card-sub">Choose a provider below — all have free options! Get your key and paste it here.</div>
+      <div className="api-card-title">🔑 Connect API Key to enable GST Lookup</div>
+      <div className="api-card-sub">Choose a provider below — all have free options! Get your key and paste it here. Your key is saved only on your device.</div>
 
       <div className="provider-grid">
         {PROVIDERS.map(pr=>(
@@ -342,7 +342,7 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
               <input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/>
             </div>
           </div>
-          {provider!=="gemini"&&<div style={{background:"var(--gold-light)",border:"1px solid var(--gold-border)",borderRadius:8,padding:"8px 12px",fontSize:12,color:"var(--gold)",marginBottom:10}}>📸 Photo lookup only works with Google Gemini provider</div>}
+          {provider!=="gemini"&&<div style={{background:"var(--gold-light)",border:"1px solid var(--gold-border)",borderRadius:8,padding:"8px 12px",fontSize:12,color:"var(--gold)",marginBottom:10}}>📸 Photo lookup works best with Provider 1</div>}
           <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>📸 Tip: Photograph the product label for best results</div>
         </>
       )}
