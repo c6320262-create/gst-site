@@ -253,7 +253,6 @@ function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
   if(apiKey) return (
     <div className="api-saved">
       <div className="api-saved-text">✅ Connected — GST lookup active!</div>
-      <button className="btn btn-outline btn-sm" onClick={clear}>Change</button>
     </div>
   );
 
@@ -303,10 +302,10 @@ function LookupTab({onUseCalc, history, setHistory, provider, apiKey}) {
     if(!apiKey){setErr("Please connect your API key first (see the box above).");return;}
     if(!query.trim()&&!img64) return;
     setLoading(true);setErr("");setInfo(null);
-    const prompt = `You are an Indian GST expert. ${img64&&provider==="gemini"?"Identify the product in the image and then provide":`For the product "${query}", provide`} GST information under Indian GST law 2024-25.
+    const prompt = `You are an Indian GST expert. ${img64&&provider==="gemini"?"Identify the product in the image and then provide":`For the product "${query}", provide`} detailed GST information under Indian GST law 2024-25.
 Respond ONLY with valid JSON, no markdown, no backticks, no explanation:
-{"applicable":true,"rate":18,"detectedName":"product name","category":"category name","hsn":"HSN code","type":"Goods or Services","note":"brief explanation","exemptionReason":"","alternateRates":""}
-Important rules: applicable must be true even for 0% zero-rated items. false only if completely exempt from GST. rate must be exactly one of: 0, 5, 12, 18, or 28.`;
+{"applicable":true,"rate":18,"detectedName":"product name","category":"category name","hsn":"HSN code","type":"Goods or Services","note":"Write 3 to 4 lines explaining: 1) Why this GST rate applies 2) Which GST council notification covers this 3) Any special conditions or exemptions 4) If rate was recently changed mention that too","exemptionReason":"If exempt explain why in 2 lines else empty string","alternateRates":"If product has different rates for different variants explain clearly else empty string"}
+Important rules: applicable must be true even for 0% zero-rated items. false only if completely exempt from GST. rate must be exactly one of: 0, 5, 12, 18, or 28. Give accurate HSN code.`;
     try {
       const text = await queryAI(prompt, (provider==="gemini"?img64:null), provider, apiKey);
       const clean = text.replace(/```json|```/g,"").trim();
@@ -342,7 +341,6 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
               <input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/>
             </div>
           </div>
-          {provider!=="gemini"&&<div style={{background:"var(--gold-light)",border:"1px solid var(--gold-border)",borderRadius:8,padding:"8px 12px",fontSize:12,color:"var(--gold)",marginBottom:10}}>📸 Photo lookup works best with Provider 1</div>}
           <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>📸 Tip: Photograph the product label for best results</div>
         </>
       )}
@@ -361,9 +359,12 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
           </div>
           {isYes&&<><div className="rate-big">{info.rate}%</div><div style={{fontSize:13,color:"var(--text2)"}}>{info.category}</div></>}
           <div className="info-grid">
-            {info.hsn&&<div className="info-item"><div className="info-lbl">HSN/SAC</div><div className="info-val">{info.hsn}</div></div>}
+            {info.hsn&&<div className="info-item"><div className="info-lbl">HSN/SAC Code</div><div className="info-val">{info.hsn}</div></div>}
             {info.category&&<div className="info-item"><div className="info-lbl">Category</div><div className="info-val">{info.category}</div></div>}
-            {info.type&&<div className="info-item"><div className="info-lbl">Type</div><div className="info-val">{info.type}</div></div>}
+            {info.type&&<div className="info-item"><div className="info-lbl">Supply Type</div><div className="info-val">{info.type}</div></div>}
+            {isYes&&<div className="info-item"><div className="info-lbl">CGST Rate</div><div className="info-val">{info.rate/2}%</div></div>}
+            {isYes&&<div className="info-item"><div className="info-lbl">SGST Rate</div><div className="info-val">{info.rate/2}%</div></div>}
+            {isYes&&<div className="info-item"><div className="info-lbl">IGST Rate</div><div className="info-val">{info.rate}%</div></div>}
           </div>
           {isYes&&<div className="breakdown">
             <div className="bk-row"><span className="bk-hd">Intra-State</span><span/></div>
