@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GST Calculator India - Check GST Rate by Product Name or Photo</title>
 <meta name="description" content="Free GST Calculator India. Check GST rate of any product by name or photo. Get HSN code, CGST, SGST, IGST breakdown and generate tax invoice instantly."/>
-<meta name="keywords" content="GST calculator, GST rate finder, HSN code, CGST SGST calculator, India GST, tax invoice generator"/>
+<meta name="keywords" content="GST calculator, GST rate finder, HSN code, CGST SGST calculator, India GST, tax invoice generator, what is GST, GST slabs India"/>
+<meta name="author" content="GST Calculator Pro"/>
+<meta property="og:title" content="GST Calculator Pro India"/>
+<meta property="og:description" content="Free GST Calculator India. Check any product GST rate by name or photo instantly."/>
+<meta property="og:type" content="website"/>
+
+<!-- FAVICON / LOGO -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c8860a'/><text y='55' x='50' text-anchor='middle' font-size='38' font-family='Arial' font-weight='bold' fill='white'>GST</text><text y='78' x='50' text-anchor='middle' font-size='18' font-family='Arial' fill='white'>₹</text></svg>"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -19,24 +27,23 @@
   --green:#0a7a4a;--green-light:#e8f5ee;
   --red:#b91c1c;--red-light:#fef2f2;
   --blue:#1d4ed8;--blue-light:#eff6ff;
-  --purple:#7c3aed;--purple-light:#f5f3ff;
 }
 body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);}
 .app{min-height:100vh;padding:24px 14px 60px;}
 .wrap{max-width:820px;margin:0 auto;}
 .hdr{text-align:center;margin-bottom:24px;}
 .hdr-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-light);border:1px solid var(--gold-border);color:var(--gold);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:12px;}
+.logo{width:64px;height:64px;background:var(--gold);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 16px rgba(200,134,10,.3);}
+.logo-text{color:#fff;font-size:18px;font-weight:800;line-height:1;}
+.logo-sub{color:rgba(255,255,255,.85);font-size:14px;font-weight:700;}
 .hdr h1{font-size:clamp(28px,5vw,50px);line-height:1;margin-bottom:6px;font-weight:700;}
 .hdr h1 em{color:var(--gold);font-style:normal;}
 .hdr p{color:var(--text2);font-size:13px;}
-
-/* API SETUP */
 .api-card{background:var(--surface);border:1.5px solid var(--gold-border);border-radius:16px;padding:20px;margin-bottom:16px;}
 .api-card-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:4px;}
 .api-card-sub{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6;}
 .provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
 .provider-btn{padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s;text-align:center;}
-.provider-btn:hover{border-color:var(--gold);color:var(--gold);}
 .provider-btn.on{background:var(--gold-light);border-color:var(--gold-border);color:var(--gold);font-weight:700;}
 .provider-name{font-size:13px;font-weight:600;display:block;}
 .provider-tag{font-size:10px;color:var(--green);font-weight:600;display:block;margin-top:2px;}
@@ -46,11 +53,8 @@ body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);}
 .api-inp:focus{border-color:var(--gold);}
 .api-inp::placeholder{color:var(--text3);}
 .api-link{font-size:12px;color:var(--blue);text-decoration:none;display:block;margin-bottom:10px;}
-.api-saved{background:var(--green-light);border:1px solid #a7d9be;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.api-saved-text{font-size:13px;color:var(--green);font-weight:600;}
-
-.tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;gap:3px;margin-bottom:18px;}
-.tab{flex:1;padding:10px 4px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;}
+.tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;gap:3px;margin-bottom:18px;overflow-x:auto;}
+.tab{flex:1;padding:10px 4px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;white-space:nowrap;}
 .tab.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1);font-weight:600;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);}
 .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
@@ -154,9 +158,20 @@ body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);}
 .fb-card-meta{font-size:11px;color:var(--text3);}
 .fb-card-cat{display:inline-block;background:var(--gold-light);color:var(--gold);font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;margin-bottom:5px;}
 .fb-card-msg{font-size:13px;color:var(--text2);line-height:1.6;}
+/* FAQ */
+.faq-item{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.faq-q{width:100%;text-align:left;padding:15px 18px;background:var(--surface);border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.faq-q:hover{background:var(--surface2);}
+.faq-arrow{color:var(--gold);font-size:18px;transition:transform .2s;flex-shrink:0;}
+.faq-arrow.open{transform:rotate(180deg);}
+.faq-a{padding:0 18px 15px;font-size:13px;color:var(--text2);line-height:1.8;background:var(--surface);}
+.faq-section-title{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin:20px 0 10px;}
+.slab-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+.slab-table th{background:var(--gold);color:#fff;padding:8px 12px;text-align:left;font-size:12px;}
+.slab-table td{padding:8px 12px;border-bottom:1px solid var(--border);}
+.slab-table tr:nth-child(even) td{background:var(--surface2);}
 .footer-note{text-align:center;color:var(--text3);font-size:11px;margin-top:8px;}
-.free-badge{background:var(--green-light);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;border:1px solid #a7d9be;margin-left:5px;}
-@media(max-width:480px){.calc-2col{grid-template-columns:1fr;}.provider-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.calc-2col{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -172,19 +187,68 @@ const INIT_FBS = [
 ];
 
 const PROVIDERS = [
-  { id:"gemini", name:"Provider 1", tag:"FREE Forever", free:true, placeholder:"AIzaSy-xxxxxxxxxxxx", link:"https://aistudio.google.com/app/apikey", linkText:"Get free key at aistudio.google.com" },
-  { id:"groq",   name:"Provider 2", tag:"FREE Tier",    free:true, placeholder:"gsk_xxxxxxxxxxxx",    link:"https://console.groq.com",              linkText:"Get free key at console.groq.com" },
-  { id:"openrouter", name:"Provider 3", tag:"FREE Models", free:true, placeholder:"sk-or-xxxxxxxxxxxx", link:"https://openrouter.ai/keys",            linkText:"Get free key at openrouter.ai" },
-  { id:"claude", name:"Provider 4",      tag:"Paid",        free:false, placeholder:"sk-ant-xxxxxxxxxxxx", link:"https://console.anthropic.com",        linkText:"Get key at console.anthropic.com" },
+  {id:"gemini",name:"Provider 1",tag:"FREE Forever",free:true,placeholder:"AIzaSy-xxxxxxxxxxxx",link:"https://aistudio.google.com/app/apikey",linkText:"Get free key at aistudio.google.com"},
+  {id:"groq",name:"Provider 2",tag:"FREE Tier",free:true,placeholder:"gsk_xxxxxxxxxxxx",link:"https://console.groq.com",linkText:"Get free key at console.groq.com"},
+  {id:"openrouter",name:"Provider 3",tag:"FREE Models",free:true,placeholder:"sk-or-xxxxxxxxxxxx",link:"https://openrouter.ai/keys",linkText:"Get free key at openrouter.ai"},
+  {id:"claude",name:"Provider 4",tag:"Paid",free:false,placeholder:"sk-ant-xxxxxxxxxxxx",link:"https://console.anthropic.com",linkText:"Get key at console.anthropic.com"},
+];
+
+const FAQS = [
+  {
+    section:"📘 Basic GST Questions",
+    items:[
+      {q:"What is GST?",a:"GST stands for Goods and Services Tax. It is a single indirect tax levied on the supply of goods and services across India. GST replaced multiple taxes like VAT, Service Tax, Excise Duty and others. It was introduced on 1st July 2017 under the slogan 'One Nation One Tax'. GST is collected at every stage of the supply chain but the final burden falls only on the end consumer."},
+      {q:"When was GST introduced in India?",a:"GST was introduced in India on 1st July 2017. It was passed in the Parliament as the 101st Constitutional Amendment Act. GST Council was formed to decide GST rates and policies. It is considered the biggest tax reform in India since Independence."},
+      {q:"What are the GST slabs in India?",a:<>India has 5 GST rate slabs:<table className='slab-table'><thead><tr><th>GST Rate</th><th>Products / Services</th></tr></thead><tbody><tr><td>0%</td><td>Essential items — milk, eggs, fresh vegetables, grains</td></tr><tr><td>5%</td><td>Common use items — edible oil, sugar, tea, coffee, medicines</td></tr><tr><td>12%</td><td>Computers, processed food, mobile phones (older)</td></tr><tr><td>18%</td><td>Most services, electronics, soaps, hair oil</td></tr><tr><td>28%</td><td>Luxury items — cars, tobacco, cement, washing machines</td></tr></tbody></table></>},
+      {q:"What is the difference between CGST, SGST and IGST?",a:"CGST (Central GST) is collected by the Central Government. SGST (State GST) is collected by the State Government. Both CGST and SGST are charged for transactions within the same state (Intra-State). IGST (Integrated GST) is charged for transactions between two different states (Inter-State) and is collected by the Central Government. For example: If you buy a product worth ₹1000 with 18% GST within Maharashtra — CGST 9% = ₹90 + SGST 9% = ₹90. If you buy across states — IGST 18% = ₹180."},
+      {q:"Who needs to register for GST?",a:"Any business with annual turnover above ₹40 lakhs (for goods) or ₹20 lakhs (for services) must register for GST. In some special category states this limit is ₹20 lakhs for goods and ₹10 lakhs for services. E-commerce sellers must register regardless of turnover. Businesses doing inter-state supply must also register."},
+      {q:"What is the GST registration turnover limit?",a:"The GST registration limit is ₹40 lakhs per year for businesses selling goods. For service providers the limit is ₹20 lakhs per year. For special category states like Manipur, Mizoram, Nagaland, Tripura the limit is ₹20 lakhs for goods and ₹10 lakhs for services. Businesses below this limit can also voluntarily register for GST."},
+    ]
+  },
+  {
+    section:"🔢 HSN & SAC Codes",
+    items:[
+      {q:"What is HSN Code?",a:"HSN stands for Harmonised System of Nomenclature. It is a 6-8 digit code used to classify goods under GST. Every product has a unique HSN code. HSN codes help in identifying the correct GST rate for a product. Businesses with turnover above ₹5 crores must mention 6-digit HSN code on invoices. Smaller businesses can use 4-digit HSN codes."},
+      {q:"What is SAC Code?",a:"SAC stands for Services Accounting Code. It is similar to HSN code but used for services instead of goods. Every service has a unique SAC code under GST. For example: SAC 9963 is for accommodation services like hotels. SAC 9954 is for construction services. SAC codes help in finding the correct GST rate for services."},
+    ]
+  },
+  {
+    section:"🧮 GST Calculator FAQs",
+    items:[
+      {q:"How to calculate GST?",a:"There are two ways to calculate GST: (1) Adding GST to base price — GST Amount = Base Price × GST Rate ÷ 100. Total Price = Base Price + GST Amount. Example: Product costs ₹1000, GST 18% → GST = ₹180, Total = ₹1180. (2) Extracting GST from total price — Base Price = Total Price × 100 ÷ (100 + GST Rate). GST Amount = Total Price - Base Price. Example: Total price ₹1180, GST 18% → Base = ₹1000, GST = ₹180."},
+      {q:"What is the difference between GST inclusive and GST exclusive?",a:"GST Exclusive means the price shown does not include GST. GST is added on top of the price. Example: Product MRP ₹1000 + 18% GST = ₹1180 total. GST Inclusive means the price already includes GST. You need to extract GST from the total. Example: Total ₹1180 already has 18% GST inside it. Base price = ₹1000, GST = ₹180."},
+      {q:"How to calculate CGST and SGST separately?",a:"For Intra-State transactions, total GST is split equally between CGST and SGST. Formula: CGST = Total GST ÷ 2. SGST = Total GST ÷ 2. Example: Product ₹1000 with 18% GST → Total GST = ₹180. CGST = ₹90 (9%), SGST = ₹90 (9%). Both go on the invoice separately."},
+    ]
+  },
+  {
+    section:"📦 Product GST FAQs",
+    items:[
+      {q:"Which products are exempt from GST?",a:"Many essential items are fully exempt from GST: Fresh fruits and vegetables, Milk and curd, Eggs, Unbranded flour, rice and pulses, Fresh meat and fish, Books and newspapers, Bangles, Handloom products, Services by religious institutions. These items have 0% GST or are outside GST scope completely."},
+      {q:"What is GST on mobile phones?",a:"Mobile phones attract 12% GST in India. This was revised from 18% to 12% by the GST Council. HSN code for mobile phones is 8517. Mobile phone accessories like chargers, earphones, covers attract 18% GST. Mobile phone repair services attract 18% GST."},
+      {q:"What is GST on gold and jewellery?",a:"Gold attracts 3% GST in India. Making charges on gold jewellery attract 5% GST separately. So if you buy gold jewellery — 3% GST on gold value + 5% GST on making charges. HSN code for gold is 7108. Silver also attracts 3% GST. Diamond and precious stones attract 0.25% GST."},
+      {q:"What is GST on food items?",a:"GST on food varies: Fresh and unprocessed food — 0% GST. Branded packaged food — 5% GST. Restaurants without AC — 5% GST. Restaurants with AC — 5% GST. Hotels with room tariff above ₹7500 — 18% GST on food. Ice cream parlours — 18% GST. Sweets from sweet shops — 5% GST."},
+      {q:"What is GST on medicines?",a:"Most medicines attract 5% GST in India. Life saving drugs attract 5% GST. Some medicines are at 12% GST. Ayurvedic medicines attract 12% GST. Hospital services are exempt from GST — 0%. Medical devices like syringes attract 12% GST. Ambulance services are exempt from GST."},
+      {q:"What is GST on petrol and diesel?",a:"Petrol and Diesel are currently outside the GST framework in India. They are taxed under the older system of Central Excise Duty and State VAT. The GST Council has not yet brought petroleum products under GST. This is a major pending reform. Only Aviation Turbine Fuel (ATF) and Natural Gas inclusion is being discussed."},
+      {q:"What is GST on real estate?",a:"Under-construction properties attract 5% GST. Affordable housing (below ₹45 lakhs) attracts 1% GST. Completed ready-to-move properties with occupancy certificate — 0% GST. Land purchase — No GST. Commercial properties under construction — 12% GST. Renting residential property — Exempt from GST for individual landlords."},
+      {q:"What is GST on insurance?",a:"Life insurance premiums attract 18% GST. Health insurance premiums attract 18% GST. Term insurance premiums attract 18% GST. There has been discussion about reducing GST on health and life insurance to make it more affordable, but as of 2025 it remains at 18%."},
+    ]
+  },
+  {
+    section:"📋 GST Filing & Compliance",
+    items:[
+      {q:"What are GST return types?",a:"Major GST returns are: GSTR-1 — Details of outward supplies, filed monthly or quarterly. GSTR-3B — Monthly summary return with tax payment. GSTR-9 — Annual return filed once a year. GSTR-2B — Auto-drafted input tax credit statement. Composition dealers file GSTR-4 quarterly. Non-filers face late fees of ₹50 per day (₹20 for nil returns)."},
+      {q:"What is Input Tax Credit (ITC)?",a:"Input Tax Credit means you can reduce the GST you paid on purchases from the GST you collect on sales. Example: You bought raw material paying ₹180 GST. You sold finished product collecting ₹360 GST. You pay only ₹360 - ₹180 = ₹180 GST to government. This avoids double taxation and is one of the key benefits of GST."},
+      {q:"What is Reverse Charge Mechanism in GST?",a:"Normally the seller pays GST to the government. Under Reverse Charge Mechanism (RCM), the buyer is responsible to pay GST directly to the government. RCM applies in cases like: Buying from unregistered dealers above ₹5000 per day, Import of services, Specific categories like legal services, transport services (GTA), etc."},
+    ]
+  },
 ];
 
 async function callGemini(prompt, imageBase64, apiKey) {
   const parts = [];
   if(imageBase64) parts.push({inlineData:{mimeType:"image/jpeg",data:imageBase64}});
-  parts.push({text: prompt});
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
+  parts.push({text:prompt});
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,{
+    method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({contents:[{parts}]})
   });
   const data = await res.json();
@@ -193,7 +257,7 @@ async function callGemini(prompt, imageBase64, apiKey) {
 }
 
 async function callGroq(prompt, apiKey) {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
     method:"POST",
     headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
     body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"user",content:prompt}],max_tokens:1000})
@@ -204,7 +268,7 @@ async function callGroq(prompt, apiKey) {
 }
 
 async function callOpenRouter(prompt, apiKey) {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions",{
     method:"POST",
     headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
     body:JSON.stringify({model:"mistralai/mistral-7b-instruct:free",messages:[{role:"user",content:prompt}],max_tokens:1000})
@@ -216,9 +280,9 @@ async function callOpenRouter(prompt, apiKey) {
 
 async function callClaude(prompt, imageBase64, apiKey) {
   const userContent = imageBase64
-    ? [{type:"image",source:{type:"base64",media_type:"image/jpeg",data:imageBase64}},{type:"text",text:prompt}]
-    : prompt;
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    ?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:imageBase64}},{type:"text",text:prompt}]
+    :prompt;
+  const res = await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
     headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userContent}]})
@@ -229,34 +293,24 @@ async function callClaude(prompt, imageBase64, apiKey) {
 }
 
 async function queryAI(prompt, imageBase64, provider, apiKey) {
-  if(provider==="gemini") return callGemini(prompt, imageBase64, apiKey);
-  if(provider==="groq")   return callGroq(prompt, apiKey);
-  if(provider==="openrouter") return callOpenRouter(prompt, apiKey);
-  if(provider==="claude") return callClaude(prompt, imageBase64, apiKey);
+  if(provider==="gemini") return callGemini(prompt,imageBase64,apiKey);
+  if(provider==="groq") return callGroq(prompt,apiKey);
+  if(provider==="openrouter") return callOpenRouter(prompt,apiKey);
+  if(provider==="claude") return callClaude(prompt,imageBase64,apiKey);
   throw new Error("No provider selected");
 }
 
-// ── API SETUP ─────────────────────────────────────────────────────────────────
-function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
-  const [input, setInput] = useState("");
-  const [show, setShow] = useState(false);
-  const p = PROVIDERS.find(x=>x.id===provider) || PROVIDERS[0];
-
-  const save = () => {
-    if(!input.trim()) return;
-    setApiKey(input.trim());
-    localStorage.setItem("gst_api_key", input.trim());
-    localStorage.setItem("gst_provider", provider);
-  };
-  const clear = () => { setApiKey(""); setInput(""); localStorage.removeItem("gst_api_key"); };
-
+function ApiSetup({provider,setProvider,apiKey,setApiKey}) {
+  const [input,setInput]=useState("");
+  const [show,setShow]=useState(false);
+  const p=PROVIDERS.find(x=>x.id===provider)||PROVIDERS[0];
+  const save=()=>{if(!input.trim()) return;setApiKey(input.trim());localStorage.setItem("gst_api_key",input.trim());localStorage.setItem("gst_provider",provider);};
+  const clear=()=>{setApiKey("");setInput("");localStorage.removeItem("gst_api_key");};
   if(apiKey) return null;
-
   return (
     <div className="api-card">
       <div className="api-card-title">🔑 Connect API Key to enable GST Lookup</div>
-      <div className="api-card-sub">Choose a provider below — all have free options! Get your key and paste it here. Your key is saved only on your device.</div>
-
+      <div className="api-card-sub">Choose any provider — all have free options! Get your key and paste it here. Key is saved only on your device.</div>
       <div className="provider-grid">
         {PROVIDERS.map(pr=>(
           <button key={pr.id} className={`provider-btn${provider===pr.id?" on":""}`} onClick={()=>setProvider(pr.id)}>
@@ -265,9 +319,7 @@ function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
           </button>
         ))}
       </div>
-
       <a className="api-link" href={p.link} target="_blank">👉 {p.linkText}</a>
-
       <div className="api-row">
         <input className="api-inp" type={show?"text":"password"} placeholder={p.placeholder} value={input} onChange={e=>setInput(e.target.value)}/>
         <button className="btn btn-sm btn-outline" onClick={()=>setShow(s=>!s)}>{show?"Hide":"Show"}</button>
@@ -278,45 +330,39 @@ function ApiSetup({provider, setProvider, apiKey, setApiKey}) {
   );
 }
 
-// ── LOOKUP ────────────────────────────────────────────────────────────────────
-function LookupTab({onUseCalc, history, setHistory, provider, apiKey}) {
+function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
   const [query,setQuery]=useState("");
   const [img64,setImg64]=useState(null);
   const [imgSrc,setImgSrc]=useState(null);
   const [loading,setLoading]=useState(false);
   const [info,setInfo]=useState(null);
   const [err,setErr]=useState("");
-
-  const loadFile = file => {
+  const loadFile=file=>{
     if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {setImgSrc(e.target.result);setImg64(e.target.result.split(",")[1]);setInfo(null);setErr("");};
+    const reader=new FileReader();
+    reader.onload=e=>{setImgSrc(e.target.result);setImg64(e.target.result.split(",")[1]);setInfo(null);setErr("");};
     reader.readAsDataURL(file);
   };
-
-  const checkGST = async () => {
-    if(!apiKey){setErr("Please connect your API key first (see the box above).");return;}
+  const checkGST=async()=>{
+    if(!apiKey){setErr("Please connect your API key first.");return;}
     if(!query.trim()&&!img64) return;
     setLoading(true);setErr("");setInfo(null);
-    const prompt = `You are an Indian GST expert. ${img64&&provider==="gemini"?"Identify the product in the image and then provide":`For the product "${query}", provide`} detailed GST information under Indian GST law 2024-25.
-Respond ONLY with valid JSON, no markdown, no backticks, no explanation:
-{"applicable":true,"rate":18,"detectedName":"product name","category":"category name","hsn":"HSN code","type":"Goods or Services","note":"Write 3 to 4 lines explaining: 1) Why this GST rate applies 2) Which GST council notification covers this 3) Any special conditions or exemptions 4) If rate was recently changed mention that too","exemptionReason":"If exempt explain why in 2 lines else empty string","alternateRates":"If product has different rates for different variants explain clearly else empty string"}
-Important rules: applicable must be true even for 0% zero-rated items. false only if completely exempt from GST. rate must be exactly one of: 0, 5, 12, 18, or 28. Give accurate HSN code.`;
+    const prompt=`You are an Indian GST expert. ${img64&&provider==="gemini"?"Identify the product in the image and then provide":`For the product "${query}", provide`} detailed GST information under Indian GST law 2024-25.
+Respond ONLY with valid JSON no markdown no backticks:
+{"applicable":true,"rate":18,"detectedName":"product name","category":"category name","hsn":"HSN code","type":"Goods or Services","note":"Write 3 to 4 lines: 1) Why this GST rate applies 2) Which GST council notification covers this 3) Any special conditions or exemptions 4) Any recent changes in rate","exemptionReason":"If exempt explain why in 2 lines else empty string","alternateRates":"If product has different rates for different variants explain clearly else empty string"}
+Rules: applicable=true even for 0% zero-rated. false only if completely exempt. rate must be exactly 0,5,12,18 or 28. Give accurate HSN code.`;
     try {
-      const text = await queryAI(prompt, (provider==="gemini"?img64:null), provider, apiKey);
-      const clean = text.replace(/```json|```/g,"").trim();
-      const parsed = JSON.parse(clean);
-      const result = {...parsed, product: img64&&provider==="gemini"?(parsed.detectedName||"Identified Product"):query};
+      const text=await queryAI(prompt,(provider==="gemini"?img64:null),provider,apiKey);
+      const parsed=JSON.parse(text.replace(/```json|```/g,"").trim());
+      const result={...parsed,product:img64&&provider==="gemini"?(parsed.detectedName||"Identified Product"):query};
       setInfo(result);
       setHistory(h=>[result,...h.filter(x=>x.product!==result.product)].slice(0,12));
-    } catch(e){setErr("Error: "+e.message+". Please check your API key.");}
+    } catch(e){setErr("Error: "+e.message);}
     setLoading(false);
   };
-
   const clearImg=()=>{setImg64(null);setImgSrc(null);setInfo(null);};
   const isYes=info&&info.applicable&&info.rate>0;
   const cls=isYes?"yes":"no";
-
   return (
     <div className="card">
       <div className="card-title">📦 Search by Name or Photo</div>
@@ -328,14 +374,8 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
       ):(
         <>
           <div className="photo-options">
-            <div className="photo-btn">
-              <span className="ico">📷</span><span>Open Camera</span>
-              <input type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files[0])}/>
-            </div>
-            <div className="photo-btn">
-              <span className="ico">🖼️</span><span>Choose Photo</span>
-              <input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/>
-            </div>
+            <div className="photo-btn"><span className="ico">📷</span><span>Open Camera</span><input type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files[0])}/></div>
+            <div className="photo-btn"><span className="ico">🖼️</span><span>Choose Photo</span><input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/></div>
           </div>
           <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>📸 Tip: Photograph the product label for best results</div>
         </>
@@ -349,8 +389,7 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
       {err&&<div className="err">⚠️ {err}</div>}
       {info&&!loading&&(
         <div className={`result ${cls}`}>
-          <div className="r-top">
-            <div className="r-product">{info.product}</div>
+          <div className="r-top"><div className="r-product">{info.product}</div>
             <span className={`r-status ${cls}`}>{isYes?"GST Applicable":info.rate===0&&info.applicable?"Zero Rated":"Exempt"}</span>
           </div>
           {isYes&&<><div className="rate-big">{info.rate}%</div><div style={{fontSize:13,color:"var(--text2)"}}>{info.category}</div></>}
@@ -363,10 +402,10 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
             {isYes&&<div className="info-item"><div className="info-lbl">IGST Rate</div><div className="info-val">{info.rate}%</div></div>}
           </div>
           {isYes&&<div className="breakdown">
-            <div className="bk-row"><span className="bk-hd">Intra-State</span><span/></div>
+            <div className="bk-row"><span className="bk-hd">Intra-State Supply</span><span/></div>
             <div className="bk-row"><span>CGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
-            <div className="bk-row"><span>SGST/UTGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
-            <div className="bk-row" style={{marginTop:6}}><span className="bk-hd">Inter-State</span><span/></div>
+            <div className="bk-row"><span>SGST / UTGST</span><span style={{fontWeight:600}}>{info.rate/2}%</span></div>
+            <div className="bk-row" style={{marginTop:6}}><span className="bk-hd">Inter-State Supply</span><span/></div>
             <div className="bk-row"><span>IGST</span><span style={{fontWeight:600}}>{info.rate}%</span></div>
           </div>}
           {info.note&&<div className="note-box">📋 {info.note}</div>}
@@ -379,7 +418,6 @@ Important rules: applicable must be true even for 0% zero-rated items. false onl
   );
 }
 
-// ── CALCULATOR ────────────────────────────────────────────────────────────────
 function CalcTab({initRate}) {
   const [amount,setAmount]=useState("");const [rate,setRate]=useState(initRate||18);
   const [mode,setMode]=useState("excl");const [txn,setTxn]=useState("intra");
@@ -408,8 +446,8 @@ function CalcTab({initRate}) {
       <div className="slabs">{SLABS.map(s=><button key={s} className={`slab${parseFloat(rate)===s?" on":""}`} onClick={()=>setRate(s)}>{s}%</button>)}</div>
       <div className="field-lbl">Transaction type</div>
       <div className="ctog" style={{marginBottom:14}}>
-        <button className={`ctog-btn${txn==="intra"?" on":""}`} onClick={()=>setTxn("intra")}>🏙️ Intra-State</button>
-        <button className={`ctog-btn${txn==="inter"?" on":""}`} onClick={()=>setTxn("inter")}>🌐 Inter-State</button>
+        <button className={`ctog-btn${txn==="intra"?" on":""}`} onClick={()=>setTxn("intra")}>🏙️ Intra-State (CGST+SGST)</button>
+        <button className={`ctog-btn${txn==="inter"?" on":""}`} onClick={()=>setTxn("inter")}>🌐 Inter-State (IGST)</button>
       </div>
       {n>0&&<>
         <div className="results-row">
@@ -444,13 +482,13 @@ function CalcTab({initRate}) {
               <tbody><tr><td>1</td><td>{invDesc||"Product / Service"}</td><td style={{textAlign:"right"}}>₹{fmt(base)}</td><td style={{textAlign:"right"}}>₹{fmt(gstAmt)}</td><td style={{textAlign:"right"}}>₹{fmt(total)}</td></tr></tbody>
               <tfoot>
                 {txn==="intra"?<>
-                  <tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>CGST@{r/2}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(half)}</td></tr>
-                  <tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>SGST@{r/2}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(half)}</td></tr>
-                </>:<tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>IGST@{r}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(gstAmt)}</td></tr>}
+                  <tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>CGST @ {r/2}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(half)}</td></tr>
+                  <tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>SGST @ {r/2}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(half)}</td></tr>
+                </>:<tr><td colSpan="3"/><td style={{fontSize:11,color:"var(--text2)"}}>IGST @ {r}%</td><td style={{textAlign:"right",fontSize:11}}>₹{fmt(gstAmt)}</td></tr>}
                 <tr className="tr"><td colSpan="3"/><td style={{fontWeight:700}}>Grand Total</td><td style={{textAlign:"right",fontWeight:700,color:"var(--green)"}}>₹{fmt(total)}</td></tr>
               </tfoot>
             </table>
-            <div className="inv-footer">For reference only · Verify with a CA before filing</div>
+            <div className="inv-footer">For reference only · Verify with a CA before filing returns</div>
           </div>}
         </div>
       </>}
@@ -458,7 +496,6 @@ function CalcTab({initRate}) {
   );
 }
 
-// ── HISTORY ───────────────────────────────────────────────────────────────────
 function HistoryTab({history,onClear}) {
   if(!history.length) return (
     <div className="card"><div className="card-title">🕐 Recent Lookups</div>
@@ -481,7 +518,34 @@ function HistoryTab({history,onClear}) {
   );
 }
 
-// ── FEEDBACK ──────────────────────────────────────────────────────────────────
+function FaqTab() {
+  const [open,setOpen]=useState(null);
+  const toggle=key=>setOpen(o=>o===key?null:key);
+  return (
+    <div>
+      {FAQS.map((section,si)=>(
+        <div key={si}>
+          <div className="card">
+            <div className="faq-section-title">{section.section}</div>
+            {section.items.map((faq,fi)=>{
+              const key=`${si}-${fi}`;
+              return (
+                <div key={key} className="faq-item">
+                  <button className="faq-q" onClick={()=>toggle(key)}>
+                    <span>{faq.q}</span>
+                    <span className={`faq-arrow${open===key?" open":""}`}>▼</span>
+                  </button>
+                  {open===key&&<div className="faq-a">{faq.a}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function FeedbackTab() {
   const [feedbacks,setFeedbacks]=useState(INIT_FBS);
   const [rating,setRating]=useState(0);const [hover,setHover]=useState(0);
@@ -557,38 +621,32 @@ function FeedbackTab() {
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
 function App() {
   const [tab,setTab]=useState("lookup");
   const [calcRate,setCalcRate]=useState(18);
   const [history,setHistory]=useState([]);
-  const [provider,setProvider]=useState(()=>localStorage.getItem("gst_provider")||"gemini");
+  const [provider,setProvider]=useState(()=>localStorage.getItem("gst_provider")||"groq");
   const [apiKey,setApiKey]=useState(()=>localStorage.getItem("gst_api_key")||"");
-
-  const handleSetProvider = p => {
-    setProvider(p);
-    if(apiKey) { setApiKey(""); localStorage.removeItem("gst_api_key"); }
-  };
-
+  const handleSetProvider=p=>{setProvider(p);if(apiKey){setApiKey("");localStorage.removeItem("gst_api_key");}};
   return (
     <div className="app">
       <div className="wrap">
         <div className="hdr">
           <div className="hdr-badge">🇮🇳 India · GST Portal</div>
+          <div className="logo"><div className="logo-text">GST</div><div className="logo-sub">₹</div></div>
           <h1>GST <em>Calculator</em> Pro</h1>
           <p>Photo lookup · Full breakdown · Invoice generator · 100% Free</p>
         </div>
-
         <ApiSetup provider={provider} setProvider={handleSetProvider} apiKey={apiKey} setApiKey={setApiKey}/>
-
         <div className="tabs">
-          {[["lookup","🔍 Lookup"],["calc","🧮 Calculator"],["history","🕐 History"],["feedback","💬 Feedback"]].map(([k,v])=>(
+          {[["lookup","🔍 Lookup"],["calc","🧮 Calculator"],["history","🕐 History"],["faq","❓ FAQ"],["feedback","💬 Feedback"]].map(([k,v])=>(
             <button key={k} className={`tab${tab===k?" on":""}`} onClick={()=>setTab(k)}>{v}</button>
           ))}
         </div>
         {tab==="lookup"&&<LookupTab onUseCalc={r=>{setCalcRate(r);setTab("calc");}} history={history} setHistory={setHistory} provider={provider} apiKey={apiKey}/>}
         {tab==="calc"&&<CalcTab initRate={calcRate}/>}
         {tab==="history"&&<HistoryTab history={history} onClear={()=>setHistory([])}/>}
+        {tab==="faq"&&<FaqTab/>}
         {tab==="feedback"&&<FeedbackTab/>}
         <div className="footer-note">© 2025 GST Calculator Pro · India · For reference only · Verify with a CA</div>
       </div>
