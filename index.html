@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GST Calculator India - Check GST Rate by Product Name or Photo</title>
-<meta name="description" content="Free GST Calculator India. Check GST rate of any product by name or photo. Get HSN code, CGST, SGST, IGST breakdown and generate tax invoice instantly."/>
+<meta name="description" content="Free GST Calculator India. Search any product to instantly check GST rate, HSN code, CGST, SGST, IGST breakdown and generate tax invoice."/>
 <meta name="keywords" content="GST calculator, GST rate finder, HSN code, CGST SGST calculator, India GST, tax invoice generator, what is GST, GST slabs India"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c8860a'/><text y='52' x='50' text-anchor='middle' font-size='36' font-family='Arial Black' font-weight='900' fill='white'>GST</text><text y='75' x='50' text-anchor='middle' font-size='22' font-family='Arial' fill='white'>₹</text></svg>"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -359,30 +359,20 @@ function ApiSetup({provider,setProvider,apiKey,setApiKey}) {
 // Lookup Tab
 function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
   const [query,setQuery]=useState("");
-  const [img64,setImg64]=useState(null);
-  const [imgSrc,setImgSrc]=useState(null);
   const [loading,setLoading]=useState(false);
   const [info,setInfo]=useState(null);
   const [err,setErr]=useState("");
 
-  const loadFile=file=>{
-    if(!file) return;
-    const reader=new FileReader();
-    reader.onload=e=>{setImgSrc(e.target.result);setImg64(e.target.result.split(",")[1]);setInfo(null);setErr("");};
-    reader.readAsDataURL(file);
-  };
-
   const checkGST=async()=>{
     if(!apiKey){setErr("Please connect your API key first using the setup box above.");return;}
-    if(!query.trim()&&!img64) return;
+    if(!query.trim()) return;
     setLoading(true);setErr("");setInfo(null);
-    const isImg=img64&&provider==="gemini";
-    const prompt=GST_PROMPT(query,isImg);
+    const prompt=GST_PROMPT(query,false);
     try {
-      const text=await queryAI(prompt,isImg?img64:null,provider,apiKey);
+      const text=await queryAI(prompt,null,provider,apiKey);
       const parsed=parseJSON(text);
       if(![0,5,12,18,28].includes(parsed.rate)) throw new Error("Invalid rate returned. Please try again.");
-      const result={...parsed,product:isImg?(parsed.detectedName||"Identified Product"):query};
+      const result={...parsed,product:query};
       setInfo(result);
       setHistory(h=>[result,...h.filter(x=>x.product!==result.product)].slice(0,12));
     } catch(e){
@@ -391,37 +381,22 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
     setLoading(false);
   };
 
-  const clearImg=()=>{setImg64(null);setImgSrc(null);setInfo(null);};
-  const isApplicable=info&&info.applicable&&info.rate>0;
-  const isExempt=info&&(!info.applicable||(info.applicable&&info.rate===0));
-  const resultCls=isApplicable?"yes":isExempt?"exempt":"no";
-
   return (
     <>
       <div className="card">
-        <div className="card-title">📦 Search by Name or Photo</div>
-        {imgSrc?(
-          <div className="preview-wrap">
-            <img src={imgSrc} alt="product" className="preview-img"/>
-            <button className="preview-rm" onClick={clearImg}>✕ Remove</button>
-          </div>
-        ):(
-          <>
-            <div className="photo-options">
-              <div className="photo-btn"><span className="ico">📷</span><span>Open Camera</span><input type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files[0])}/></div>
-              <div className="photo-btn"><span className="ico">🖼️</span><span>Choose Photo</span><input type="file" accept="image/*" onChange={e=>loadFile(e.target.files[0])}/></div>
-            </div>
-            <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>📸 Tip: Photograph the product label for best results</div>
-          </>
-        )}
-        <div style={{textAlign:"center",color:"var(--text3)",fontSize:12,marginBottom:10}}>— or type the product name —</div>
+        <div className="card-title">🔍 Search GST Rate by Product Name</div>
+        <div style={{marginBottom:10,fontSize:13,color:"var(--text2)"}}>Type any product or service name below to instantly check its GST rate, HSN code and full tax breakdown.</div>
         <div className="row">
           <input className="inp" placeholder="e.g. Mobile phone, Tea, Gold jewellery, Books..." value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&checkGST()}/>
-          <button className="btn btn-gold" onClick={checkGST} disabled={loading||(!query.trim()&&!img64)}>{loading?"...":"Check GST"}</button>
+          <button className="btn btn-gold" onClick={checkGST} disabled={loading||!query.trim()}>{loading?"...":"Check GST"}</button>
         </div>
         {loading&&<div className="loading"><div className="ld"/><div className="ld"/><div className="ld"/><span>Checking GST rates...</span></div>}
         {err&&<div className="err">⚠️ {err}</div>}
-        {info&&!loading&&(
+        {info&&!loading&&(()=>{
+          const isApplicable=info.applicable&&info.rate>0;
+          const isExempt=!info.applicable||(info.applicable&&info.rate===0);
+          const resultCls=isApplicable?"yes":isExempt?"exempt":"no";
+          return (
           <div className={`result ${resultCls}`}>
             <div className="r-top">
               <div className="r-product">{info.product}</div>
@@ -453,7 +428,7 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
             {info.alternateRates&&<div className="alt-box">⚡ {info.alternateRates}</div>}
             {isApplicable&&<button className="btn btn-gold btn-sm" style={{marginTop:14}} onClick={()=>onUseCalc(info.rate)}>Use {info.rate}% in Calculator →</button>}
           </div>
-        )}
+        );})()}
       </div>
       <LookupFAQ/>
     </>
@@ -735,7 +710,7 @@ function App() {
           <div className="hdr-badge">🇮🇳 India · GST Portal</div>
           <div className="logo"><div className="logo-text">GST</div><div className="logo-sub">₹</div></div>
           <h1>GST <em>Calculator</em> Pro</h1>
-          <p>Photo lookup · Full breakdown · Invoice generator · 100% Free</p>
+          <p>Search any product · Full GST breakdown · Invoice generator · 100% Free</p>
         </div>
         <ApiSetup provider={provider} setProvider={handleSetProvider} apiKey={apiKey} setApiKey={setApiKey}/>
         <div className="tabs">
