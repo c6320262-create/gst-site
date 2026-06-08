@@ -221,40 +221,130 @@ const PROVIDERS = [
 ];
 
 // Strict GST prompt with verified rates
-const GST_PROMPT = (productName, isImage) => `You are a highly accurate Indian GST expert with deep knowledge of Indian GST laws as of 2024-25.
+const GST_PROMPT = (productName) => `You are a highly accurate Indian GST expert. For the product or service: "${productName}", provide complete GST classification under Indian GST law 2024-25.
 
-${isImage ? "Identify the product in this image, then" : `For the product: "${productName}",`} provide the CORRECT GST rate.
+Respond ONLY with this exact JSON, no markdown, no extra text:
+{
+  "supplyType": "Taxable or Exempt or Nil Rated or Zero Rated or Non GST",
+  "applicable": true or false,
+  "rate": 0 or 5 or 12 or 18 or 28,
+  "detectedName": "product or service name",
+  "category": "category name",
+  "hsn": "HSN or SAC code",
+  "type": "Goods or Services",
+  "rcm": true or false,
+  "rcmNote": "explain who pays GST under RCM if applicable, else empty string",
+  "note": "2-3 sentences explaining GST status clearly",
+  "exemptionReason": "explain why exempt or nil rated if applicable, else empty string",
+  "alternateRates": "IMPORTANT: if product has different rates based on form/brand/value mention ALL variants clearly, else empty string",
+  "clarification": "if product name is ambiguous mention what assumptions were made, else empty string"
+}
 
-CRITICAL VERIFIED GST RATES — you must follow these exactly:
-- Books, textbooks, newspapers, maps = 0% (NIL rated, Exempt)
-- Fresh vegetables, fruits, milk, eggs, curd, unbranded rice/wheat = 0% (Exempt)
-- Mobile phones, smartphones = 12% (HSN 8517)
-- Tea (all types branded/unbranded), coffee = 5% (HSN 0902/0901)
-- Edible oils (coconut, sunflower, mustard etc) = 5%
-- Pencils, pens, stationery = 12% (HSN 9609/9608)
-- Sugar, salt = 5%
-- Medicines, drugs = 5% or 12%
-- Gold, silver = 3%
-- Branded packaged namkeen, snacks, chips = 18%
-- Hair oil = 18%
-- Soap, shampoo, toothpaste = 18%
-- Laptop, computers = 18%
-- AC, washing machine, refrigerator = 28%
-- Cement = 28%
+SUPPLY TYPE DEFINITIONS:
+- Taxable = GST charged at 5/12/18/28%
+- Nil Rated = 0% GST, within GST scope, ITC not available
+- Exempt = Outside GST, no tax, ITC not available
+- Zero Rated = Exports/SEZ, 0% GST, ITC available
+- Non GST = Completely outside GST (petrol, alcohol)
+
+AGRICULTURAL PRODUCE RULES — VERY IMPORTANT:
+Fresh/raw form = EXEMPT:
+- Fresh vegetables (potato, onion, tomato, carrot, etc) = Exempt
+- Fresh fruits (mango, banana, apple, etc) = Exempt
+- Fresh turmeric, fresh ginger, fresh garlic = Exempt
+- Fresh chilli, fresh coriander = Exempt
+- Fresh coconut = Exempt
+- Raw sugarcane = Exempt
+- Raw cotton = Exempt
+- Fresh flowers = Exempt
+- Fresh meat, fresh fish, fresh eggs = Exempt
+
+Dried/Processed/Packaged form = TAXABLE:
+- Dry turmeric (whole or powder) = 5%
+- Dry ginger powder = 5%
+- Dry chilli, chilli powder = 5%
+- Coriander powder, cumin powder = 5%
+- All spice powders = 5%
+- Coconut oil = 5%
+- Desiccated coconut = 5%
+- Processed/packaged vegetables = 5% or 12%
+- Fruit pulp, fruit juice = 12%
+
+BRANDED vs UNBRANDED RULES:
+- Unbranded rice, wheat, flour, pulses = Exempt
+- Branded rice, wheat, flour, pulses = 5%
+- Unbranded atta, maida, besan = Exempt
+- Branded atta, maida, besan = 5%
+- Unbranded namkeen = 5%
+- Branded namkeen, chips, snacks = 18%
+- Unbranded paneer = Exempt
+- Branded paneer = 5%
+- Unbranded curd = Exempt
+- Branded curd = 5%
+
+COMPOSITION SCHEME:
+- Manufacturers turnover < 1.5 crore = 1% GST
+- Traders turnover < 1.5 crore = 1% GST
+- Restaurants under composition = 5% GST
+
+EXEMPT ITEMS:
+- Fresh milk, lassi, buttermilk (unbranded) = Exempt
+- Salt = Exempt
+- Books, textbooks, newspapers = Exempt
+- Educational services (schools/colleges) = Exempt
+- Healthcare (hospitals/doctors/ambulance) = Exempt
+- Public transport (auto, bus, metro, train) = Exempt
+- Religious services = Exempt
+- Electricity = Exempt
+- Agriculture services = Exempt
+- Renting residential property (by individual) = Exempt
+
+NON GST ITEMS:
+- Petrol, diesel, crude oil = Non GST
+- Alcohol for human consumption = Non GST
+- Natural gas (partially) = Non GST
+
+VERIFIED GST RATES:
+- Mobile phones = 12%
+- Laptops/computers = 18%
+- Tea/coffee (branded) = 5%
+- Edible oils = 5%
+- Sugar = 5%
+- Medicines/drugs = 5%
+- Pencils/pens = 12%
+- Hair oil/shampoo/soap = 18%
+- Gold/silver = 3%
+- Restaurants = 5%
+- AC/washing machine = 28%
 - Cars = 28%
-- Cigarettes, tobacco = 28%
-- Restaurants (AC or non-AC) = 5%
-- Hotels room tariff above 7500 = 18%
-- Real estate under construction = 5%
+- Cement = 28%
+- Cigarettes/tobacco = 28%
+- IT/Banking/Insurance services = 18%
+- Hotels (room tariff above 7500) = 18%
+- Hotels (room tariff 2500-7500) = 12%
+- Construction services = 5% or 12%
+- Works contract = 18%
 
-Respond ONLY with this exact JSON format, no markdown, no extra text:
-{"applicable":true,"rate":5,"detectedName":"product name","category":"category name","hsn":"HSN or SAC code","type":"Goods or Services","note":"2-3 sentences: which GST slab this falls under and why, any GST council notification reference","exemptionReason":"if 0% or exempt, explain why clearly, else empty string","alternateRates":"if product has variants with different rates mention them clearly, else empty string"}
+RCM SUPPLIES — rcm=true:
+- Legal services by advocate = RCM (recipient pays)
+- Goods Transport Agency (GTA) = RCM (recipient pays)
+- Services by director to company = RCM
+- Import of services = RCM
+- Sponsorship services = RCM
+- Insurance agent services = RCM
+- Recovery agent services = RCM
+- Security services = RCM
+- Renting of motor vehicle = RCM (in some cases)
 
-Rules:
-- applicable = true for all rated items including 0% zero-rated. false ONLY if completely outside GST scope.
-- rate MUST be exactly one of: 0, 5, 12, 18, 28
-- Always give accurate 4-8 digit HSN/SAC code
-- Double check your rate against the verified list above before responding`;
+CRITICAL RULES:
+- ALWAYS check if product is fresh/raw vs dried/processed vs branded/unbranded
+- Fresh/raw agricultural produce = ALWAYS Exempt
+- Dried/processed agricultural produce = TAXABLE at 5%
+- Branded food = higher rate than unbranded
+- rate MUST be exactly 0, 5, 12, 18 or 28
+- In alternateRates field ALWAYS mention fresh vs processed difference for agricultural items
+- In clarification field mention what form/type was assumed
+- Give accurate HSN (goods) or SAC (services) code`;
 
 async function callGemini(prompt, imageBase64, apiKey) {
   const parts = [];
@@ -367,7 +457,7 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
     if(!apiKey){setErr("Please connect your API key first using the setup box above.");return;}
     if(!query.trim()) return;
     setLoading(true);setErr("");setInfo(null);
-    const prompt=GST_PROMPT(query,false);
+    const prompt=GST_PROMPT(query);
     try {
       const text=await queryAI(prompt,null,provider,apiKey);
       const parsed=parseJSON(text);
@@ -385,9 +475,9 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
     <>
       <div className="card">
         <div className="card-title">🔍 Search GST Rate by Product Name</div>
-        <div style={{marginBottom:10,fontSize:13,color:"var(--text2)"}}>Type any product or service name below to instantly check its GST rate, HSN code and full tax breakdown.</div>
+        <div style={{marginBottom:10,fontSize:13,color:"var(--text2)"}}>Type any product or service name. For accurate results be specific — e.g. <em>"fresh turmeric"</em> or <em>"turmeric powder"</em>, <em>"branded rice"</em> or <em>"unbranded rice"</em>.</div>
         <div className="row">
-          <input className="inp" placeholder="e.g. Mobile phone, Tea, Gold jewellery, Books..." value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&checkGST()}/>
+          <input className="inp" placeholder="e.g. Fresh turmeric, Branded rice, Legal services, GTA..." value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&checkGST()}/>
           <button className="btn btn-gold" onClick={checkGST} disabled={loading||!query.trim()}>{loading?"...":"Check GST"}</button>
         </div>
         {loading&&<div className="loading"><div className="ld"/><div className="ld"/><div className="ld"/><span>Checking GST rates...</span></div>}
@@ -396,16 +486,42 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
           const isApplicable=info.applicable&&info.rate>0;
           const isExempt=!info.applicable||(info.applicable&&info.rate===0);
           const resultCls=isApplicable?"yes":isExempt?"exempt":"no";
+          const supplyColor={
+            "Taxable":"var(--green)",
+            "Exempt":"var(--text2)",
+            "Nil Rated":"var(--blue)",
+            "Zero Rated":"var(--gold)",
+            "Non GST":"var(--red)"
+          }[info.supplyType]||"var(--text2)";
           return (
           <div className={`result ${resultCls}`}>
             <div className="r-top">
               <div className="r-product">{info.product}</div>
-              <span className={`r-status ${resultCls}`}>
-                {isApplicable?"GST Applicable":info.rate===0&&info.applicable?"Zero Rated / Nil":"Exempt"}
+              <span className={`r-status ${resultCls}`} style={{background:supplyColor}}>
+                {info.supplyType||( isApplicable?"Taxable":"Exempt")}
               </span>
             </div>
             {isApplicable&&<><div className="rate-big">{info.rate}%</div><div style={{fontSize:13,color:"var(--text2)",fontWeight:500}}>{info.category}</div></>}
-            {isExempt&&<div style={{fontSize:16,fontWeight:700,color:"var(--text2)",margin:"10px 0 4px"}}>No GST Applicable</div>}
+            {!isApplicable&&<div style={{fontSize:16,fontWeight:700,color:"var(--text2)",margin:"10px 0 4px"}}>No GST Applicable</div>}
+
+            {/* Supply Type explanation box */}
+            <div style={{background:"rgba(255,255,255,0.7)",borderRadius:10,padding:"10px 14px",marginTop:12,fontSize:13}}>
+              <div style={{fontWeight:700,color:"var(--text)",marginBottom:4}}>Supply Classification</div>
+              {info.supplyType==="Taxable"&&<div style={{color:"var(--green)"}}>✅ This is a <strong>Taxable Supply</strong> — GST is charged at {info.rate}%</div>}
+              {info.supplyType==="Exempt"&&<div style={{color:"var(--text2)"}}>🚫 This is an <strong>Exempt Supply</strong> — No GST charged. ITC not available on inputs.</div>}
+              {info.supplyType==="Nil Rated"&&<div style={{color:"var(--blue)"}}>⭕ This is a <strong>Nil Rated Supply</strong> — GST rate is 0%. Supply is within GST scope but no tax charged.</div>}
+              {info.supplyType==="Zero Rated"&&<div style={{color:"var(--gold)"}}>🌐 This is a <strong>Zero Rated Supply</strong> — 0% GST. ITC available. Applies to exports and SEZ supplies.</div>}
+              {info.supplyType==="Non GST"&&<div style={{color:"var(--red)"}}>❌ This is a <strong>Non GST Supply</strong> — Completely outside GST scope. Governed by other tax laws.</div>}
+            </div>
+
+            {/* RCM Box */}
+            {info.rcm&&(
+              <div style={{background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:13}}>
+                <div style={{fontWeight:700,color:"#e65100",marginBottom:4}}>⚠️ Reverse Charge Mechanism (RCM) Applies</div>
+                <div style={{color:"#bf360c"}}>{info.rcmNote||"Under RCM, the recipient (buyer) is liable to pay GST directly to the government instead of the supplier."}</div>
+              </div>
+            )}
+
             <div className="info-grid">
               {info.hsn&&<div className="info-item"><div className="info-lbl">HSN / SAC Code</div><div className="info-val">{info.hsn}</div></div>}
               {info.category&&<div className="info-item"><div className="info-lbl">Category</div><div className="info-val">{info.category}</div></div>}
@@ -424,8 +540,9 @@ function LookupTab({onUseCalc,history,setHistory,provider,apiKey}) {
               </div>
             )}
             {info.note&&<div className="note-box">📋 {info.note}</div>}
+            {info.clarification&&<div style={{marginTop:8,fontSize:13,background:"var(--blue-light)",border:"1px solid #bfdbfe",borderRadius:9,padding:"10px 14px",color:"var(--blue)",lineHeight:1.7}}>💡 <strong>Assumption:</strong> {info.clarification}</div>}
             {info.exemptionReason&&<div className="exempt-box">ℹ️ {info.exemptionReason}</div>}
-            {info.alternateRates&&<div className="alt-box">⚡ {info.alternateRates}</div>}
+            {info.alternateRates&&<div className="alt-box">⚡ <strong>Different rates may apply:</strong> {info.alternateRates}</div>}
             {isApplicable&&<button className="btn btn-gold btn-sm" style={{marginTop:14}} onClick={()=>onUseCalc(info.rate)}>Use {info.rate}% in Calculator →</button>}
           </div>
         );})()}
